@@ -5,13 +5,6 @@ import { UpdateList } from "@/lib/api/schemas";
 
 export const runtime = "nodejs";
 
-// Next 14/15 compatible params helper
-type Ctx = { params: { id: string } } | { params: Promise<{ id: string }> };
-async function getId(ctx: Ctx) {
-  const p = await ctx.params;
-  return p.id as string;
-}
-
 // ensure the list belongs to a board the user owns
 async function ensureListOwner(listId: string, userId: string) {
   const { data, error } = await supaAdmin
@@ -23,10 +16,19 @@ async function ensureListOwner(listId: string, userId: string) {
   return !error && !!data;
 }
 
-export async function PATCH(req: NextRequest, ctx: Ctx) {
+// tiny helper: /api/lists/:id → id
+function getIdFromUrl(req: NextRequest) {
+  const pathname = new URL(req.url).pathname; // e.g. /api/lists/123
+  const m = pathname.match(/\/api\/lists\/([^/]+)/);
+  return m?.[1] ?? "";
+}
+
+export async function PATCH(req: NextRequest) {
   const { user, error } = await requireUser(req);
   if (!user) return error!;
-  const id = await getId(ctx);
+
+  const id = getIdFromUrl(req);
+  if (!id) return NextResponse.json({ error: "Bad id" }, { status: 400 });
 
   const parsed = UpdateList.safeParse(await req.json());
   if (!parsed.success)
@@ -46,15 +48,18 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   return NextResponse.json(data);
 }
 
-export async function DELETE(req: NextRequest, ctx: Ctx) {
+export async function DELETE(req: NextRequest) {
   const { user, error } = await requireUser(req);
   if (!user) return error!;
-  const id = await getId(ctx);
+
+  const id = getIdFromUrl(req);
+  if (!id) return NextResponse.json({ error: "Bad id" }, { status: 400 });
 
   const ok = await ensureListOwner(id, user.id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { error: qErr } = await supaAdmin.from("lists").delete().eq("id", id);
   if (qErr) return NextResponse.json({ error: qErr.message }, { status: 500 });
+
   return NextResponse.json({ ok: true });
 }

@@ -5,12 +5,17 @@ import { UpdateBoard } from "@/lib/api/schemas";
 
 export const runtime = "nodejs";
 
-type Ctx = { params: Promise<{ id: string }> }; // ← params is async
+function getIdFromUrl(req: NextRequest) {
+  const m = new URL(req.url).pathname.match(/\/api\/boards\/([^/]+)/);
+  return m?.[1] ?? "";
+}
 
-export async function GET(req: NextRequest, ctx: Ctx) {
+export async function GET(req: NextRequest) {
   const { user, error } = await requireUser(req);
   if (!user) return error!;
-  const { id: boardId } = await ctx.params; // ← await it
+
+  const boardId = getIdFromUrl(req);
+  if (!boardId) return NextResponse.json({ error: "Bad id" }, { status: 400 });
 
   const { data: board, error: bErr } = await supaAdmin
     .from("boards")
@@ -44,10 +49,12 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   return NextResponse.json({ board, lists, tasks });
 }
 
-export async function PATCH(req: NextRequest, ctx: Ctx) {
+export async function PATCH(req: NextRequest) {
   const { user, error } = await requireUser(req);
   if (!user) return error!;
-  const { id } = await ctx.params; // ← await it
+
+  const id = getIdFromUrl(req);
+  if (!id) return NextResponse.json({ error: "Bad id" }, { status: 400 });
 
   const parsed = UpdateBoard.safeParse(await req.json());
   if (!parsed.success)
@@ -66,17 +73,19 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   return NextResponse.json(data);
 }
 
-export async function DELETE(req: NextRequest, ctx: Ctx) {
+export async function DELETE(req: NextRequest) {
   const { user, error } = await requireUser(req);
   if (!user) return error!;
-  const { id } = await ctx.params; // ← await it
+
+  const id = getIdFromUrl(req);
+  if (!id) return NextResponse.json({ error: "Bad id" }, { status: 400 });
 
   const { error: qErr } = await supaAdmin
     .from("boards")
     .delete()
     .eq("id", id)
     .eq("owner_id", user.id);
-  if (qErr) return NextResponse.json({ error: qErr.message }, { status: 404 });
+  if (qErr) return NextResponse.json({ error: qErr.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

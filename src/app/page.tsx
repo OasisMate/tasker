@@ -17,31 +17,38 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-md">
-      <Card className="space-y-3">
-        <h2 className="text-lg font-semibold">Sign in</h2>
-        <p className="text-sm text-gray-600">We’ll email you a magic link.</p>
-        <Input
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Button
-          variant="primary"
-          onClick={async () => {
-            if (!email) return;
-            await supa.auth.signInWithOtp({
-              email,
-              options: { emailRedirectTo: `${window.location.origin}/` },
-            });
-            setSent(true);
-          }}
-        >
-          Send magic link
-        </Button>
-        {sent && <p className="text-xs text-green-600">Check your inbox.</p>}
+      <Card>
+        <div className="grid gap-3">
+          <h2 className="text-lg font-semibold">Sign in</h2>
+          <p className="text-sm text-gray-600">We’ll email you a magic link.</p>
+
+          <Input
+            type="email"
+            autoComplete="email"
+            className="w-full"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={async () => {
+              if (!email) return;
+              await supa.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: `${window.location.origin}/` },
+              });
+              setSent(true);
+            }}
+          >
+            Send magic link
+          </Button>
+
+          {sent && <p className="text-xs text-green-600">Check your inbox.</p>}
+        </div>
       </Card>
     </div>
   );
 }
-
