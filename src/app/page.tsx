@@ -30,7 +30,10 @@ export default function Home() {
           variant="primary"
           onClick={async () => {
             if (!email) return;
-            await supa.auth.signInWithOtp({ email });
+            await supa.auth.signInWithOtp({
+              email,
+              options: { emailRedirectTo: `${window.location.origin}/` },
+            });
             setSent(true);
           }}
         >
