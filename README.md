@@ -1,6 +1,3 @@
-Here’s a drop-in **README.md** (with API docs + deploy checklist). Paste it at the repo root.
-
----
 
 # Tasker — Next.js + Supabase Kanban
 
