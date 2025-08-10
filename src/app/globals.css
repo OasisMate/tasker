@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
+/* THEME TOKENS */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand: 31 91 215;
+  --bg-start: 86 204 242;
+  --bg-end: 47 128 237;
+  --card: 248 250 252;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+[data-theme="blue"]   { --brand: 31 91 215;  --bg-start: 86 204 242;  --bg-end: 47 128 237;  --card: 248 250 252; }
+[data-theme="green"]  { --brand: 14 159 110; --bg-start: 52 211 153;  --bg-end: 16 185 129;  --card: 247 254 251; }
+[data-theme="purple"] { --brand: 109 40 217; --bg-start: 167 139 250; --bg-end: 124 58 237;  --card: 250 248 255; }
+[data-theme="orange"] { --brand: 234 88 12;  --bg-start: 251 113 133; --bg-end: 249 115 22;  --card: 255 247 242; }
+[data-theme="gray"]   { --brand: 51 65 85;   --bg-start: 148 163 184; --bg-end: 100 116 139;  --card: 248 250 252; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* UI PRIMITIVES */
+.button{ @apply inline-flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition bg-white border-gray-200 hover:bg-gray-50 active:translate-y-[1px]; }
+.button-primary{ background: rgb(var(--brand)) !important; color:#fff !important; border-color: rgb(var(--brand)) !important; }
+.input{ @apply rounded-md border px-3 py-2 text-sm border-gray-200 focus:outline-none focus:ring-2; box-shadow:none; }
+.input:focus{ outline:2px solid rgb(var(--brand)); outline-offset:2px; }
+.card{ @apply rounded-xl border border-gray-200 p-4; background: rgb(var(--card)); }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* LAYOUT BITS */
+.board-hero{ background: linear-gradient(135deg, rgb(var(--bg-start)), rgb(var(--bg-end))); }
+.col{
+  @apply shrink-0 rounded-xl border border-gray-200 bg-white/95 backdrop-blur p-3 snap-start min-w-0;
+  /* mobile: fill most of viewport; tablet/desktop: fixed */
+  @apply w-[88vw] sm:w-72 md:w-80;
+}
+@supports (-webkit-overflow-scrolling: touch) {
+  .snap-x { -webkit-overflow-scrolling: touch; }
 }
